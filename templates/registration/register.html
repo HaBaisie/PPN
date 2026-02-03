@@ -48,8 +48,8 @@
           <div class="mb-3 slide-in" style="animation-delay:0.27s">
             <label class="form-label fw-600">Account Type</label>
             <select name="user_type" class="form-select form-select-lg" required onchange="handleRoleChange(this.value)">
-              <option value="regular">👤 Regular User (Auto-approved)</option>
-              <option value="policy_maker">📋 Policy Maker (Requires verification)</option>
+              <option value="user">👤 Regular User (Auto-approved)</option>
+              <option value="policymaker">📋 Policy Maker (Requires verification)</option>
               <option value="analyst">📊 Analyst (Requires verification)</option>
             </select>
           </div>
@@ -72,7 +72,7 @@
 function handleRoleChange(role) {
   const certSection = document.getElementById('cert-section');
   const certInput = certSection.querySelector('input[name="certificate"]');
-  if (role === 'regular') {
+  if (role === 'user') {
     certSection.style.display = 'none';
     certInput.required = false;
   } else {
