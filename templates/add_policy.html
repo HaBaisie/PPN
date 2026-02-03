@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-card">
+    <h2>Add Policy</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">Add Policy</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

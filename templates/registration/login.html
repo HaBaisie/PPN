@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+      <div class="auth-card">
+        <div class="text-center mb-4">
+          <div style="font-size:3rem; margin-bottom:12px;">🔐</div>
+          <h2 style="color:var(--primary); font-weight:700;">Welcome Back</h2>
+          <p class="text-muted small">Sign in to your Policy Platform Nigeria account</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="animation: slideIn 0.4s ease;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <div class="mb-3 slide-in" style="animation-delay:0.1s">
+            <label class="form-label fw-600">Username</label>
+            <input type="text" name="username" class="form-control form-control-lg" placeholder="your_username" required>
+          </div>
+          <div class="mb-4 slide-in" style="animation-delay:0.2s">
+            <label class="form-label fw-600">Password</label>
+            <input type="password" name="password" class="form-control form-control-lg" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-100 slide-in" style="animation-delay:0.3s">Sign In to PPN</button>
+        </form>
+        <hr class="my-4">
+        <p class="text-center text-muted small fade-in" style="animation-delay:0.4s">
+          Don't have an account? <a href="{% url 'register' %}" class="fw-600" style="color:var(--primary)">Create one here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

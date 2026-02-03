@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="auth-card">
+        <div class="text-center mb-4">
+          <div style="font-size:3rem; margin-bottom:12px;">📝</div>
+          <h2 style="color:var(--primary); font-weight:700;">Join PPN Today</h2>
+          <p class="text-muted small">Create an account and start shaping Nigeria's policy future</p>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="animation: slideIn 0.4s ease;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              {{ form.non_field_errors }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endif %}
+          <div class="mb-3 slide-in" style="animation-delay:0.1s">
+            <label class="form-label fw-600">Username</label>
+            <input type="text" name="username" class="form-control form-control-lg" placeholder="choose_username" required>
+            {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors }}</div>{% endif %}
+          </div>
+          <div class="mb-3 slide-in" style="animation-delay:0.12s">
+            <label class="form-label fw-600">Email Address</label>
+            <input type="email" name="email" class="form-control form-control-lg" placeholder="you@example.com" required>
+            {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors }}</div>{% endif %}
+          </div>
+          <div class="mb-3 slide-in" style="animation-delay:0.17s">
+            <label class="form-label fw-600">Password</label>
+            <input type="password" name="password1" class="form-control form-control-lg" placeholder="••••••••" required>
+            {% if form.password1.errors %}<div class="text-danger small mt-1">{{ form.password1.errors }}</div>{% endif %}
+          </div>
+          <div class="mb-3 slide-in" style="animation-delay:0.22s">
+            <label class="form-label fw-600">Confirm Password</label>
+            <input type="password" name="password2" class="form-control form-control-lg" placeholder="••••••••" required>
+            {% if form.password2.errors %}<div class="text-danger small mt-1">{{ form.password2.errors }}</div>{% endif %}
+          </div>
+          <div class="mb-3 slide-in" style="animation-delay:0.27s">
+            <label class="form-label fw-600">Account Type</label>
+            <select name="user_type" class="form-select form-select-lg" required onchange="handleRoleChange(this.value)">
+              <option value="regular">👤 Regular User (Auto-approved)</option>
+              <option value="policy_maker">📋 Policy Maker (Requires verification)</option>
+              <option value="analyst">📊 Analyst (Requires verification)</option>
+            </select>
+          </div>
+          <div class="mb-4 slide-in" id="cert-section" style="display:none; animation-delay:0.32s">
+            <label class="form-label fw-600">Professional Certificate</label>
+            <input type="file" name="certificate" class="form-control form-control-lg" accept=".pdf" required>
+            <small class="text-muted d-block mt-2">📄 Upload your professional credentials (PDF). Our admin team will review and verify your account.</small>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-100 slide-in" style="animation-delay:0.38s">Create Account</button>
+        </form>
+        <hr class="my-4">
+        <p class="text-center text-muted small fade-in" style="animation-delay:0.4s">
+          Already have an account? <a href="{% url 'login' %}" class="fw-600" style="color:var(--primary)">Sign in here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function handleRoleChange(role) {
+  const certSection = document.getElementById('cert-section');
+  const certInput = certSection.querySelector('input[name="certificate"]');
+  if (role === 'regular') {
+    certSection.style.display = 'none';
+    certInput.required = false;
+  } else {
+    certSection.style.display = 'block';
+    certInput.required = true;
+  }
+}
+</script>
+{% endblock %}

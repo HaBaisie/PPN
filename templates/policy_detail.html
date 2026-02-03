@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <!-- Header Section -->
+  <div class="fade-in mb-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+      <div class="flex-grow-1">
+        <h1 class="mb-2" style="color:var(--primary); font-weight:700;">{{ policy.name }}</h1>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <div class="d-flex align-items-center gap-2">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user{{ policy.added_by.id }}" class="avatar" alt="Author" style="width:40px; height:40px;">
+            <div>
+              <p class="mb-0 fw-600" style="font-size:0.95rem;">User #{{ policy.added_by.id }}</p>
+              <small class="text-muted">{{ policy.created_at|date:"M d, Y" }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        {% if user_liked %}
+          <a href="{% url 'like_policy' policy.pk %}" class="btn btn-sm btn-outline-danger scale-up">💔 Unlike ({{ policy.like_set.count }})</a>
+        {% else %}
+          <a href="{% url 'like_policy' policy.pk %}" class="btn btn-sm btn-primary scale-up">❤️ Like ({{ policy.like_set.count }})</a>
+        {% endif %}
+
+        {% if user_reshared %}
+          <a href="{% url 'reshare_policy' policy.pk %}" class="btn btn-sm btn-outline-secondary scale-up" style="animation-delay:0.1s">↩️ Unshare ({{ policy.reshare_set.count }})</a>
+        {% else %}
+          <a href="{% url 'reshare_policy' policy.pk %}" class="btn btn-sm btn-outline-primary scale-up" style="animation-delay:0.1s">🔄 Reshare ({{ policy.reshare_set.count }})</a>
+        {% endif %}
+
+        <a class="btn btn-sm btn-outline-info scale-up" target="_blank" style="animation-delay:0.2s" href="https://twitter.com/intent/tweet?text={{ policy.name|urlencode }}%20-%20{{ policy.description|truncatechars:120|urlencode }}&url={{ request.build_absolute_uri }}">🐦 Tweet</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Policy Description -->
+      <div class="card mb-4 slide-in" style="animation-delay:0.1s">
+        <div class="card-body p-4">
+          <h5 class="mb-3" style="color:var(--primary);">📋 Policy Overview</h5>
+          <p class="lead" style="line-height:1.8; color:#333;">{{ policy.description }}</p>
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="slide-in" style="animation-delay:0.15s">
+        <h5 class="mb-3" style="color:var(--primary);">💬 Community Discussion ({{ comments|length }} comments)</h5>
+        
+        {% for comment in comments %}
+          <div class="comment-card mb-3" style="animation-delay:0.{{ forloop.counter0 }}s">
+            <div class="d-flex gap-3">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user{{ comment.user.id }}" class="avatar" alt="User" style="width:40px; height:40px;">
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div>
+                    <p class="mb-0 fw-600">User #{{ comment.user.id }}</p>
+                    <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                  </div>
+                </div>
+                <p class="mb-3" style="color:#444;">{{ comment.text }}</p>
+                
+                {% for reply in comment.comment_set.all %}
+                  <div class="bg-light p-3 rounded mb-2" style="margin-left:12px; border-left:3px solid var(--primary);">
+                    <div class="d-flex gap-2 mb-2">
+                      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user{{ reply.user.id }}" class="avatar" alt="User" style="width:32px; height:32px;">
+                      <div>
+                        <p class="mb-0 fw-600" style="font-size:0.9rem;">User #{{ reply.user.id }}</p>
+                        <small class="text-muted">{{ reply.created_at|date:"M d" }}</small>
+                      </div>
+                    </div>
+                    <p class="mb-0" style="font-size:0.95rem; color:#555;">{{ reply.text }}</p>
+                  </div>
+                {% endfor %}
+                
+                <button class="btn btn-sm btn-outline-primary" onclick="toggleReplyForm({{ comment.id }})">↩️ Reply</button>
+                <div id="reply-form-{{ comment.id }}" class="mt-2" style="display:none;">
+                  <form method="post" action="{% url 'policy_detail' policy.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent" value="{{ comment.id }}">
+                    <textarea name="text" class="form-control form-control-sm mb-2" placeholder="Write your reply..." rows="2" required></textarea>
+                    <button type="submit" class="btn btn-sm btn-primary">Post Reply</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="alert alert-info text-center fade-in" style="animation-delay:0.2s">
+            <p class="mb-0">No comments yet. Be the first to share your thoughts!</p>
+          </div>
+        {% endfor %}
+
+        <!-- Add Comment Form -->
+        <div class="card mt-4 slide-in" style="animation-delay:0.2s">
+          <div class="card-body p-4">
+            <h6 class="mb-3" style="color:var(--primary);">✍️ Share Your Thoughts</h6>
+            <form method="post">
+              {% csrf_token %}
+              <div class="mb-3">
+                <textarea name="text" class="form-control form-control-lg" rows="4" placeholder="Write a thoughtful comment..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-lg">Post Comment</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- AI Insights -->
+      <div class="card mb-4 slide-in" style="animation-delay:0.25s; background:linear-gradient(135deg, rgba(43,94,214,0.05), rgba(28,167,236,0.05));">
+        <div class="card-body p-4">
+          <h6 class="mb-3" style="color:var(--primary);">🤖 AI Insights</h6>
+          <div class="mb-3 p-3 bg-white rounded">
+            <p class="mb-1 text-muted" style="font-size:0.9rem;">Sentiment</p>
+            <p class="mb-0 fw-600" style="font-size:1.1rem; color:var(--primary);">{{ ai_insights.sentiment }}</p>
+          </div>
+          <div class="p-3 bg-white rounded">
+            <p class="mb-1 text-muted" style="font-size:0.9rem;">Recommendation</p>
+            <p class="mb-0 fw-600" style="font-size:0.95rem;">{{ ai_insights.recommendation }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Engagement Chart -->
+      <div class="card chart-card slide-in" style="animation-delay:0.3s">
+        <div class="card-body p-4">
+          <h6 class="mb-3" style="color:var(--primary);">📈 Engagement Stats</h6>
+          <canvas id="engagementChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="card mt-4 slide-in" style="animation-delay:0.35s;">
+        <div class="card-body p-4">
+          <h6 class="mb-3" style="color:var(--primary);">📊 Quick Stats</h6>
+          <div class="row text-center g-3">
+            <div class="col-6">
+              <div style="font-size:1.8rem; font-weight:700; color:var(--primary);">{{ policy.like_set.count }}</div>
+              <small class="text-muted">Likes</small>
+            </div>
+            <div class="col-6">
+              <div style="font-size:1.8rem; font-weight:700; color:var(--primary);">{{ comments|length }}</div>
+              <small class="text-muted">Comments</small>
+            </div>
+            <div class="col-6">
+              <div style="font-size:1.8rem; font-weight:700; color:var(--primary);">{{ policy.reshare_set.count }}</div>
+              <small class="text-muted">Reshares</small>
+            </div>
+            <div class="col-6">
+              <div style="font-size:1.8rem; font-weight:700; color:var(--primary);">{{ policy.comment_set.count }}</div>
+              <small class="text-muted">Total</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleReplyForm(commentId) {
+  const form = document.getElementById('reply-form-' + commentId);
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+const engagementCtx = document.getElementById('engagementChart');
+if(engagementCtx){
+    new Chart(engagementCtx, {
+      type:'doughnut',
+      data:{
+        labels:['Likes','Comments','Reshares'],
+        datasets:[{
+          data:[{{ policy.like_set.count }}, {{ comments|length }}, {{ policy.reshare_set.count }}],
+          backgroundColor:['#2b5ed6','#1ca7ec','#17a2b8'],
+          borderColor:'#fff',
+          borderWidth:2
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:true,
+        plugins:{legend:{position:'bottom'}}
+      }
+    });
+}
+</script>
+{% endblock %}

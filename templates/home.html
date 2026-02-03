@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section slide-in">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <h1 class="hero-title mb-3">Policy Platform Nigeria</h1>
+        <p class="hero-subtitle mb-4">Connecting citizens, analysts and policymakers in real-time policy discourse</p>
+        <p class="mb-4 text-muted">Discuss evidence-based policies, share insights, and amplify your voice for national impact.</p>
+        <div class="d-flex gap-3">
+          <a href="{% url 'register' %}" class="btn btn-primary btn-lg scale-up">Get Started Free</a>
+          <a href="{% url 'dashboard' %}" class="btn btn-outline-primary btn-lg scale-up" style="animation-delay:0.1s">Explore Dashboard</a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="position-relative hero-image">
+          <div class="d-flex gap-3 justify-content-center">
+            {% for img in images|slice:":2" %}
+              <img src="{{ img }}" alt="hero" class="img-fluid" style="width:45%; border-radius:12px; filter:brightness(0.98); box-shadow:0 12px 40px rgba(43,94,214,0.15);">
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light mt-4">
+  <div class="container">
+    <h2 class="text-center mb-5 fade-in">Key Features</h2>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3 stagger-1">
+        <div class="card h-100 text-center p-4 slide-in">
+          <div style="font-size:2.5rem; margin-bottom:12px;">📋</div>
+          <h5>Policy Discussions</h5>
+          <p class="text-muted small">Comment, debate, and engage with policy briefs</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 stagger-2">
+        <div class="card h-100 text-center p-4 slide-in">
+          <div style="font-size:2.5rem; margin-bottom:12px;">📊</div>
+          <h5>AI Insights</h5>
+          <p class="text-muted small">Get sentiment analysis and policy recommendations</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 stagger-3">
+        <div class="card h-100 text-center p-4 slide-in">
+          <div style="font-size:2.5rem; margin-bottom:12px;">🔗</div>
+          <h5>Social Sharing</h5>
+          <p class="text-muted small">Amplify policies on Twitter and beyond</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 stagger-4">
+        <div class="card h-100 text-center p-4 slide-in">
+          <div style="font-size:2.5rem; margin-bottom:12px;">✅</div>
+          <h5>Role-Based Access</h5>
+          <p class="text-muted small">Verified users, makers, and analysts</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Community Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-4 mb-lg-0 fade-in">
+        <h3 class="mb-4">Meet Our Community</h3>
+        <p class="mb-3">Join thousands of Nigerians shaping public discourse and influencing policy decisions.</p>
+        <div class="avatar-group mb-4">
+          {% for a in avatars %}
+            <img src="{{ a }}" class="avatar avatar-lg" title="Community Member" />
+          {% endfor %}
+        </div>
+        <div class="mt-4">
+          <h5 class="mb-3">Why Join PPN?</h5>
+          <div class="d-flex mb-2"><span class="badge bg-primary me-2">✓</span> <span>Participate in evidence-based policy debates</span></div>
+          <div class="d-flex mb-2"><span class="badge bg-primary me-2">✓</span> <span>Get your voice heard by policymakers</span></div>
+          <div class="d-flex mb-2"><span class="badge bg-primary me-2">✓</span> <span>Access AI-powered insights and analytics</span></div>
+          <div class="d-flex mb-2"><span class="badge bg-primary me-2">✓</span> <span>Share and amplify important policies</span></div>
+        </div>
+      </div>
+      <div class="col-lg-6 scale-up">
+        <div class="card p-5 text-center" style="background:linear-gradient(135deg, rgba(43,94,214,0.05), rgba(28,167,236,0.05))">
+          <div style="font-size:4rem; margin-bottom:16px;">🇳🇬</div>
+          <h4 class="mb-3">Building Nigeria's Policy Future</h4>
+          <p class="text-muted">PPN is an open-source platform dedicated to fostering inclusive, data-driven policy conversations across Nigeria.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+  <div class="container text-center fade-in">
+    <h3 class="mb-3">Ready to shape Nigeria's future?</h3>
+    <p class="lead mb-4">Join the Policy Platform Nigeria community today</p>
+    <a href="{% url 'register' %}" class="btn btn-light btn-lg scale-up">Create Your Account</a>
+  </div>
+</section>
+
+<!-- Acknowledgment Section -->
+<section class="py-5 bg-light">
+  <div class="container fade-in">
+    <div class="text-center mb-5">
+      <h4 class="mb-4">Supported By</h4>
+      <div class="d-flex justify-content-center align-items-center" style="min-height: 120px;">
+        <div class="text-center">
+          <img src="{% static 'nyff-logo.png' %}" alt="Nigeria Youth Futures Fund" class="img-fluid" style="max-height: 100px; margin-bottom: 20px; width: auto;">
+          <p class="mb-2"><strong>Nigeria Youth Futures Fund (NYFF)</strong></p>
+          <p class="text-muted small" style="max-width: 500px; margin: 0 auto;">This project is proudly supported by the Nigeria Youth Futures Fund, an initiative dedicated to empowering young Nigerians and fostering innovation in governance and policy discourse.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="fade-in">
+  <p><strong>Policy Platform Nigeria</strong> • Open-source • Built with care for democratic discourse</p>
+</footer>
+{% endblock %}

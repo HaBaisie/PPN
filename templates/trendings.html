@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <div class="mb-5 fade-in">
+    <h1 class="mb-2" style="color:var(--primary); font-weight:700;">🔥 Trending Policies</h1>
+    <p class="text-muted lead">Most reshared policies sparking conversations</p>
+  </div>
+  
+  {% if reshared %}
+    <div class="row g-4">
+      {% for r in reshared %}
+        <div class="col-md-6 col-lg-4 slide-in" style="animation-delay:0.{{ forloop.counter0 }}s">
+          <div class="trending-card h-100 d-flex flex-column">
+            <!-- Header with avatar -->
+            <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user{{ r.user.id }}" class="avatar me-2" alt="User">
+              <div class="flex-grow-1">
+                <p class="mb-0 fw-600">User #{{ r.user.id }}</p>
+                <small class="text-muted">{{ r.created_at|date:"M d, Y" }}</small>
+              </div>
+              <span class="badge bg-primary">🔄 Reshared</span>
+            </div>
+            
+            <!-- Policy content -->
+            <div class="flex-grow-1 mb-3">
+              <h5 class="mb-2" style="color:var(--primary); font-weight:600;">{{ r.policy.name }}</h5>
+              <p class="text-muted small mb-0">{{ r.policy.description|truncatewords:20 }}</p>
+            </div>
+            
+            <!-- Engagement stats -->
+            <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
+              <div class="text-center">
+                <div style="font-size:1.2rem; font-weight:600; color:var(--primary);">{{ r.policy.like_set.count }}</div>
+                <small class="text-muted">Likes</small>
+              </div>
+              <div class="text-center">
+                <div style="font-size:1.2rem; font-weight:600; color:var(--primary);">{{ r.policy.comment_set.count }}</div>
+                <small class="text-muted">Comments</small>
+              </div>
+              <div class="text-center">
+                <div style="font-size:1.2rem; font-weight:600; color:var(--primary);">{{ r.policy.reshare_set.count }}</div>
+                <small class="text-muted">Reshares</small>
+              </div>
+            </div>
+            
+            <!-- Action buttons -->
+            <div class="d-grid gap-2">
+              <a href="{% url 'policy_detail' r.policy.id %}" class="btn btn-primary btn-sm">Read Full Policy</a>
+              <a href="https://twitter.com/intent/tweet?text=Check%20out:%20{{ r.policy.name|urlencode }}&url={{ r.share_url|urlencode }}" target="_blank" class="btn btn-outline-info btn-sm">
+                🐦 Share on Twitter
+              </a>
+              {% if request.user.is_authenticated and r.user.id == request.user.id %}
+                <a href="{% url 'reshare_policy' r.policy.id %}" class="btn btn-sm btn-outline-secondary">↩️ Unshare</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card p-5 text-center fade-in">
+      <div style="font-size:3rem; margin-bottom:12px;">📭</div>
+      <h5 class="text-muted">No trending policies yet</h5>
+      <p class="text-muted small">Be the first to reshare a policy and start a trend!</p>
+      <a href="{% url 'dashboard' %}" class="btn btn-primary mt-2">Explore Policies</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

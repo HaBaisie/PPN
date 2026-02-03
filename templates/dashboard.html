@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Policy Dashboard</h1>
+    <div>
+        {% if user.user_type == 'policymaker' %}<a href="{% url 'add_policy' %}" class="btn btn-primary me-2">Add Policy</a>{% endif %}
+        {% if user.user_type == 'analyst' %}<a href="#" class="btn btn-outline-secondary">Analyst Tools</a>{% endif %}
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="chart-card mb-3 float-up">
+            <canvas id="sentimentChart" height="120"></canvas>
+        </div>
+        <div class="d-flex gap-3">
+            <div class="flex-fill chart-card mb-3 me-1">
+                <canvas id="topPoliciesChart" height="120"></canvas>
+            </div>
+            <div class="flex-fill chart-card mb-3 ms-1">
+                <canvas id="commentsOverTime" height="120"></canvas>
+            </div>
+        </div>
+        <div class="d-flex gap-3">
+            <div class="flex-fill chart-card mb-3 me-1">
+                <canvas id="topCommentersChart" height="120"></canvas>
+            </div>
+            <div class="flex-fill chart-card mb-3 ms-1">
+                <canvas id="engagementPie" height="120"></canvas>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5>Policies</h5>
+                <div class="list-group">
+                {% for policy in policies %}
+                    <a href="{% url 'policy_detail' policy.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold">{{ policy.name }}</div>
+                            <small class="text-muted">{{ policy.description|truncatechars:120 }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="badge bg-primary">{{ policy.ai_insights.sentiment }}</div>
+                            <div class="small text-muted">Likes {{ policy.like_set.count }} • Reshares {{ policy.reshare_set.count }}</div>
+                            <div class="small text-muted mt-1">{{ policy.ai_insights.recommendation|truncatechars:80 }}</div>
+                        </div>
+                    </a>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-3 p-3">
+            <h5>Live Dashboard Chat</h5>
+            <div id="chatBox" class="chat-box d-flex flex-column mb-2">
+                {% for m in recent_messages %}
+                    <div class="chat-message {% if m.user == user %}me{% else %}other{% endif %}">
+                        <strong>User #{{ m.user.id }}</strong>: {{ m.message }} <br><small class="text-muted">{{ m.created_at }}</small>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="d-flex">
+                <input id="chatInput" class="form-control me-2" placeholder="Write a message..." />
+                <button id="chatSend" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+
+        <div class="card p-3 chart-card">
+            <h6>Quick Stats</h6>
+            <p>Total policies: <strong>{{ policies|length }}</strong></p>
+            <p>Total comments: <strong>{{ sentiment_counts|length }}</strong></p>
+            <p>Total likes: <strong>{{ total_likes }}</strong></p>
+            <p>Total reshares: <strong>{{ total_reshares }}</strong></p>
+        </div>
+    </div>
+</div>
+
+<script>
+const sentimentData = {{ sentiment_counts|safe }};
+const topPolicies = {{ top_policies|safe }};
+const commentsByDay = {{ comments_by_day|safe }};
+const topCommenters = {{ top_commenters|safe }};
+const engagement = {{ engagement|safe }};
+
+// Sentiment Chart
+const ctx = document.getElementById('sentimentChart');
+if(ctx){
+    const labels = Object.keys(sentimentData);
+    const data = Object.values(sentimentData);
+    new Chart(ctx, { type: 'doughnut', data: { labels, datasets:[{ data, backgroundColor:['#2b5ed6','#9fb5ff','#d6e6ff'] }]}, options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+}
+
+// Top policies bar
+const topCtx = document.getElementById('topPoliciesChart');
+if(topCtx){
+    const labels = topPolicies.map(p=>p.name);
+    const data = topPolicies.map(p=>p.popularity);
+    new Chart(topCtx, { type: 'bar', data:{ labels, datasets:[{label:'Popularity', data, backgroundColor:'#2b5ed6'}]}, options:{indexAxis:'y', responsive:true}});
+}
+
+// Comments over time line
+const lineCtx = document.getElementById('commentsOverTime');
+if(lineCtx){
+    const labels = Object.keys(commentsByDay);
+    const data = Object.values(commentsByDay);
+    new Chart(lineCtx, { type:'line', data:{ labels, datasets:[{label:'Comments', data, borderColor:'#2b5ed6', backgroundColor:'rgba(43,94,214,0.08)'}]}, options:{responsive:true}});
+}
+
+// Chat polling and send
+function loadChat(){
+    $.get('{% url "chat_messages" %}').done(function(res){
+        const box = $('#chatBox'); box.empty();
+        res.messages.forEach(m=>{
+            const cls = m.user === '{{ user.username }}' ? 'chat-message me' : 'chat-message other';
+            box.append(`<div class="${cls}"><strong>User #${m.user_id}</strong>: ${m.message} <br><small class="text-muted">${m.created_at}</small></div>`);
+        });
+        box.scrollTop(box[0].scrollHeight);
+    });
+}
+
+$('#chatSend').on('click', function(){
+    const msg = $('#chatInput').val(); if(!msg) return;
+    $.post('{% url "post_chat_message" %}', { message: msg, csrfmiddlewaretoken: '{{ csrf_token }}' }).done(function(){ $('#chatInput').val(''); loadChat(); });
+});
+setInterval(loadChat, 3000);
+
+// Top commenters
+const topCommentersCtx = document.getElementById('topCommentersChart');
+if(topCommentersCtx){
+    const labels = topCommenters.map(c=>c.user);
+    const data = topCommenters.map(c=>c.count);
+    new Chart(topCommentersCtx, { type:'bar', data:{ labels, datasets:[{label:'Comments', data, backgroundColor:'#2b5ed6'}]}, options:{responsive:true}});
+}
+
+// Engagement pie
+const engagementCtxPie = document.getElementById('engagementPie');
+if(engagementCtxPie){
+    const labels = engagement.map(e=>e.name);
+    const data = engagement.map(e=>e.total);
+    new Chart(engagementCtxPie, { type:'pie', data:{ labels, datasets:[{data, backgroundColor:['#2b5ed6','#1ca7ec','#9fb5ff','#7fb1ff','#d6e6ff','#cfe6ff']}]}, options:{responsive:true,plugins:{legend:{position:'right'}}}});
+}
+</script>
+
+{% endblock %}
