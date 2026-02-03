@@ -15,6 +15,7 @@ class CustomUserCreationForm(UserCreationForm):
         cleaned_data = super().clean()
         user_type = cleaned_data.get('user_type')
         certificate = cleaned_data.get('certificate')
-        if user_type in ['policymaker', 'analyst'] and not certificate:
+        # Only require certificate for policymakers and analysts (use correct role names)
+        if user_type in ['policy_maker', 'analyst'] and not certificate:
             raise forms.ValidationError("Certificate is required for this role.")
         return cleaned_data
